@@ -15,6 +15,7 @@ DirtEvent {
 			// unless orbit wide diversion returns something, we proceed
 			~diversion.(this) ?? {
 				if(~s != \) { // backslash stands for do nothing
+					this.applyNoteMap;
 					this.mergeSoundEvent;
 					server = ~server.value; // as server is used a lot, make lookup more efficient
 					this.orderTimeSpan;
@@ -42,6 +43,22 @@ DirtEvent {
 		~n = if(n.notNil) { n.asFloat } { 0.0 };
 	}
 
+	applyNoteMap {
+		var noteMap, midinote, mapped;
+		if(~n == \none) {
+			noteMap = orbit.dirt.soundLibrary.noteMaps[~s];
+			if(noteMap.notNil) {
+				midinote = ~midinote.();
+				mapped = noteMap.();
+				if(mapped.notNil) {
+					~n = mapped.n;
+					~midinote = { midinote - mapped.note + 60 };
+					[midinote, mapped.note, ~n, ~midinote.()].postln;
+				}
+			}
+		}
+	}
+	
 	mergeSoundEvent {
 		var soundEvent = orbit.dirt.soundLibrary.getEvent(~s, ~n);
 		if(soundEvent.isNil) {

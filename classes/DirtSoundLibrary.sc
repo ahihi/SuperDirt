@@ -10,7 +10,7 @@ valid fileExtensions can be extended, currently they are ["wav", "aif", "aiff", 
 
 DirtSoundLibrary {
 
-	var <server, <numChannels, <buffers, <bufferEvents, <synthEvents, <metaDataEvents;
+	var <server, <numChannels, <buffers, <bufferEvents, <synthEvents, <metaDataEvents, <noteMaps;
 	var <>fileExtensions = #["wav", "aif", "aiff", "aifc"];
 	var <>verbose = false;
 	var <>defaultEvent;
@@ -25,6 +25,7 @@ DirtSoundLibrary {
 		bufferEvents = IdentityDictionary.new;
 		synthEvents = IdentityDictionary.new;
 		metaDataEvents = IdentityDictionary.new;
+		noteMaps = IdentityDictionary.new;
 	}
 
 	free {
@@ -231,6 +232,13 @@ DirtSoundLibrary {
 		^this.readSmplMetaData(path)
 	}
 
+	addNoteMap { |name, map|
+		if(noteMaps[name].notNil) {
+			"\nreplacing note map for '%'\n".postf(name);
+		};
+		noteMaps[name] = map;
+	}
+	
 	// read the `smpl` chunk of a wave file, containing metadata such as pitch
 	// https://www.recordingblogs.com/wiki/sample-chunk-of-a-wave-file
 	// currently, there seems to be no direct way to read arbitrary wave chunks, so instead this function parses the data from the log written by libsndfile
