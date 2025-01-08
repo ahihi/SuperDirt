@@ -1,0 +1,43 @@
+{-
+
+livecode DSP graphs!
+
+(see livecoding-dsp.scd for the corresponding SuperCollider code)
+
+-}
+
+
+-- define a couple of helpers:
+
+dsp' code = s "silence" # pS "dsp" code
+dsp code = dsp' (pure code)
+
+-- and write some patterns:
+
+-- basic synth with some sclang randomness
+d1
+  $ note "<<7 <10 5>> <3!2 -5> 2 0>*<8!3 16 16>*16"
+  # dsp "VarSaw.ar(~freq, rrand(0.0, 1.0), rrand(0.0, 1.0))"
+  # attack 0.001 # release (rangex 0.1 0.5 rand)
+  # delay 0.5 # delayt (3.0/16) # lock 1 # delayfb 0.5
+  # gain 0.8 # pan rand
+
+-- sampler fx
+d2
+  $ n "0@2 1@2 2@2 3 4 5 6 7 8 2@2 10 4"
+  # dsp "(in + DelayC.ar(in, 0.01, (~cycle % 2pi).sin.linexp(-1, 1, 0.001, 0.01)) * 3).scurve"
+  # s "amencutup" -- needs to go after dsp or it will be overridden by the default "silence"
+  # gain 1.1
+
+-- patterned synths and string concatenation
+d3 $ let
+  addFilter code = "RLPF.ar(" ++ code ++ ", exprand(400,8000), 0.2)"
+  synths =
+    [ ("saw", pure $ addFilter "Saw.ar(~freq)")
+    , ("sqr", pure $ addFilter "Pulse.ar(~freq)")
+    ]
+  in id
+  $ note ("[0@2 -12@3 0@3]*2" - 24)
+  # dsp' (inhabit synths "<saw sqr!2>*8")
+  # release 0.3
+  # gain 1.1
