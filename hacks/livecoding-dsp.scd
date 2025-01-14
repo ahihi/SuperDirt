@@ -85,7 +85,7 @@ eventDiversions = [
 						var dry, wet, sig;
 						dry = In.ar(dryBus, ~numChannels);
 						// wet = In.ar(effectBus, ~numChannels);
-						sig = "{ |in| %\n}".format(~gdsp.asString).interpret.(dry);
+						sig = "{ |in, dryBus, effectBus| %\n}".format(~gdsp.asString).interpret.(dry, dryBus, effectBus);
 						sig = sig * EnvGen.kr(Env.asr, gate, doneAction: Done.freeSelf);
 						// DirtPause.ar(sig, graceTime: 4);
 						ReplaceOut.ar(dryBus, sig);
@@ -137,7 +137,7 @@ eventDiversions = [
 				// TODO: should we also do the NamedControl magic here, to
 				// enable modulation with control buses?
 				in = In.ar(out, ~numChannels);
-				sig = "{ |out, in| %\n}" .format(~dsp.asString).interpret.(out, in);
+				sig = "{ |in, out| %\n}" .format(~dsp.asString).interpret.(in, out);
 				sig = DirtPan.ar(sig, ~numChannels, ~pan);
 				ReplaceOut.ar(out, sig);
 			}).add;
@@ -187,7 +187,6 @@ eventDiversions = [
 ~dirt.addModule('dirt-live-dsp', { |dirtEvent|
 dirtEvent.sendSynth(~dspSynthDef,
 	[
-		freq: ~freq,
 		out: ~out
 	]
 );	
